@@ -4,13 +4,17 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::*;
-use sdl2::render::Canvas;
 
 pub struct WindowState {
     window: sdl2::video::Window,
     events: sdl2::EventPump,
     window_width: usize,
     window_height: usize,
+}
+
+pub enum Task {
+    Nothing,
+    Pause,
 }
 
 pub fn setup_window() -> WindowState {
@@ -33,8 +37,9 @@ pub fn setup_window() -> WindowState {
     }
 }
 
-pub fn check_events(state: &mut WindowState) -> bool {
+pub fn check_events(state: &mut WindowState) -> (bool, Task) {
     let mut exit = false;
+    let mut task = Task::Nothing;
     for event in state.events.poll_iter() {
         match event {
             Event::Quit { .. }
@@ -42,10 +47,16 @@ pub fn check_events(state: &mut WindowState) -> bool {
                 keycode: Some(Keycode::Escape),
                 ..
             } => exit = true,
+            Event::KeyDown {
+                keycode: Some(Keycode::Space),
+                ..
+            } => {
+                task = Task::Pause;
+            }
             _ => (),
         }
     }
-    exit
+    (exit, task)
 }
 
 pub fn update_view(state: WindowState, world: &World) -> WindowState {

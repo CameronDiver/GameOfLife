@@ -17,12 +17,22 @@ fn main() {
     v.set_cell_at(41, 22, true);
 
     let mut state = gui::setup_window();
+    let mut paused = true;
     loop {
-        if gui::check_events(&mut state) {
+        let (exit, task) = gui::check_events(&mut state);
+        if exit {
             break;
         }
-        state = gui::update_view(state, &v);
-        v.tick();
+        match task {
+            gui::Task::Pause => {
+                paused = !paused;
+            }
+            _ => {}
+        }
+        if paused {
+            state = gui::update_view(state, &v);
+            v.tick();
+        }
         thread::sleep(time::Duration::from_millis(50))
     }
 }
